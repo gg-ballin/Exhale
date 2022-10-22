@@ -15,7 +15,7 @@ const TimeButton = ({title, bgColor, textStyle, textColor, onPress}: Props) => {
       onPress={() => onPress()}
       style={[styles.container, {backgroundColor: bgColor}]}>
       <Icon name="clock" color="#000" size={20} />
-      <Text style={[styles.text, textStyle, {color: textColor}]}>{title}</Text>
+      <Text style={[styles.text, textStyle, {color: '#000'}]}>{title}</Text>
     </TouchableOpacity>
   );
 };
