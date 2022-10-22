@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "18.1.0",
     "react-native": "0.70.3",
+    "react-native-animated-pulse": "^1.0.1",
     "react-native-linear-gradient": "^2.6.2",
     "react-native-vector-icons": "^9.2.0"
   },

@@ -1,13 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React, {useState} from 'react';
 import {
   SafeAreaView,
@@ -20,13 +10,12 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import Icon from 'react-native-vector-icons/EvilIcons';
-import Feather from 'react-native-vector-icons/Feather';
+import Icon from 'react-native-vector-icons/Feather';
 import TimeButton from './components/TimeButton';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  const [bgColor, setBgColor] = useState(null);
+  const [play, setPlay] = useState(false);
   const [button, setButton] = useState([
     {
       title: '1 min',
@@ -64,27 +53,36 @@ const App = () => {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <View>
+      <View style={styles.container}>
         <Icon name="chevron-left" color={'#ffffff'} size={25} />
-        <View></View>
-        <View style={styles.playBtnContainer}>
-          <TouchableOpacity onPress={() => {}} style={styles.circle}>
-            <Icon name="play" color={'#ffffff'} size={35} />
-          </TouchableOpacity>
+        <View style={styles.containerTitle}>
+          <Text style={styles.title}>Breathe & relax</Text>
         </View>
-        <View style={styles.timeBtns}>
-          {button.map(({title, id, selected}, index) => {
-            console.log(index);
-            console.log('selected: ', selected);
-            return (
-              <TimeButton
-                bgColor={selected ? '#fff' : '#999'}
-                title={title}
-                key={id}
-                onPress={() => handleButtonClick(index)}
-              />
-            );
-          })}
+        <View style={styles.topContainer}>
+          <View style={styles.bigCircle}></View>
+        </View>
+        <View style={styles.bottomContainer}>
+          <View style={styles.playBtnContainer}>
+            <TouchableOpacity
+              onPress={() => setPlay(!play)}
+              style={styles.circlePlayBtn}>
+              <Icon name="play" color={'#ffffff'} size={24} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.timeBtns}>
+            {button.map(({title, id, selected}, index) => {
+              console.log(index);
+              console.log('selected: ', selected);
+              return (
+                <TimeButton
+                  bgColor={selected ? '#fff' : '#999'}
+                  title={title}
+                  key={id}
+                  onPress={() => handleButtonClick(index)}
+                />
+              );
+            })}
+          </View>
         </View>
       </View>
     </LinearGradient>
@@ -92,20 +90,40 @@ const App = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   linearGradient: {
     flex: 1,
     paddingLeft: 15,
     paddingRight: 15,
     borderRadius: 5,
   },
+  container: {
+    flex: 1,
+    justifyContent: 'space-around',
+  },
+  topContainer: {
+    alignItems: 'center',
+  },
+  title: {
+    color: '#fff',
+    fontWeight: 'bold',
+    // marginBottom: 50,
+  },
+  bigCircle: {
+    width: 150,
+    height: 150,
+    borderRadius: 150 / 2,
+    backgroundColor: '#7B66FF',
+  },
+  containerTitle: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  bottomContainer: {},
   playBtnContainer: {
     alignSelf: 'center',
     marginBottom: 25,
   },
-  circle: {
+  circlePlayBtn: {
     width: 45,
     height: 45,
     borderRadius: 45 / 2,

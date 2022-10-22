@@ -1,22 +1,20 @@
-import React, {useState} from 'react';
-import {View, StyleSheet, TouchableOpacity, Text} from 'react-native';
+import React from 'react';
+import {StyleSheet, TouchableOpacity, Text} from 'react-native';
 import Icon from 'react-native-vector-icons/EvilIcons';
 
 interface Props {
   onPress: () => void;
   title: string;
-  textColor: any;
-  textStyle: any;
+  textColor?: any;
+  textStyle?: any;
   bgColor: any;
 }
 const TimeButton = ({title, bgColor, textStyle, textColor, onPress}: Props) => {
   return (
     <TouchableOpacity
-      onPress={() => {
-        onPress();
-      }}
+      onPress={() => onPress()}
       style={[styles.container, {backgroundColor: bgColor}]}>
-      <Icon name="clock" color="#fff" size={20} />
+      <Icon name="clock" color="#000" size={20} />
       <Text style={[styles.text, textStyle, {color: textColor}]}>{title}</Text>
     </TouchableOpacity>
   );
@@ -24,8 +22,7 @@ const TimeButton = ({title, bgColor, textStyle, textColor, onPress}: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    // backgroundColor: '#f2f2f2',
-    // opacity: 0.2,
+    borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 8,
     flexDirection: 'row',
