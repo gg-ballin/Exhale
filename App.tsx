@@ -1,5 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
+  Animated,
+  Dimensions,
   Image,
   SafeAreaView,
   StatusBar,
@@ -13,39 +15,61 @@ import LinearGradient from 'react-native-linear-gradient';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Icon from 'react-native-vector-icons/Feather';
 import TimeButton from './components/TimeButton';
+import Pulse from './components/Pulse';
+import {CircularProgressBase} from 'react-native-circular-progress-indicator';
+import Timer from './components/Timer';
+import AnimatedPulseImg from './components/AnimatedPulseImg';
 import On_Wallow from './assets/On_Walow.png';
 import Off_Wallow from './assets/Off_Walow.png';
-import Pulse from './components/Pulse';
-import CircularProgress from 'react-native-circular-progress-indicator';
+
+const data = [
+  {
+    title: '1 min',
+    selected: true,
+    timer: 60,
+    id: 1,
+  },
+  {
+    title: '2 min',
+    selected: false,
+    timer: 120,
+    id: 2,
+  },
+  {
+    title: '3 min',
+    selected: false,
+    timer: 180,
+    id: 3,
+  },
+];
 
 const App = () => {
+  const [button, setButton] = useState(data);
   const isDarkMode = useColorScheme() === 'dark';
   const [play, setPlay] = useState(false);
   const [pulse, setPulse] = useState([1]);
-  const [button, setButton] = useState([
-    {
-      title: '1 min',
-      selected: false,
-      id: 1,
-    },
-    {
-      title: '2 min',
-      selected: false,
-      id: 2,
-    },
-    {
-      title: '3 min',
-      selected: false,
-      id: 3,
-    },
-  ]);
-  const handleButtonClick = (index: number) => {
+  const [selectedTime, setSelectedTime] = useState(60);
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [selected, setSelected] = useState();
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+    }).start();
+    setSelected(60)
+  }, []);
+
+  const handleTimeBtnClick = (index: number) => {
+    
     const newData = [...button];
     newData[0].selected = false;
     newData[1].selected = false;
     newData[2].selected = false;
     newData[index].selected = !newData[index].selected;
     setButton(newData);
+    setSelected(newData[index].timer)
+    console.log('selected: ', selected)
   };
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -64,40 +88,54 @@ const App = () => {
         <View style={styles.containerTitle}>
           <Text style={styles.title}>Breathe & relax</Text>
         </View>
+
+        <Animated.View
+          style={[
+            styles.inExhaleContainer,
+            {
+              opacity: fadeAnim,
+            },
+          ]}>
+          <Text style={styles.inExhale}>{play ? 'Inhale' : 'Exhale'}</Text>
+        </Animated.View>
+
         <View style={styles.topContainer}>
-          <View style={styles.bigCircle}>
-            <CircularProgress
-              value={60}
-              radius={120}
-              duration={2000}
-              progressValueColor={'#ecf0f1'}
-              maxValue={200}
-              title={'KM/H'}
-              titleColor={'white'}
-              titleStyle={{fontWeight: 'bold'}}
-            />
-            {pulse.map((item, index) =>
-              play ? <Pulse repeat={index === 0} /> : <View />,
-            )}
-            {play ? (
-              <Image
-                source={On_Wallow}
-                resizeMode="contain"
-                style={styles.offWallowImg}
-              />
-            ) : (
-              <Image
-                source={Off_Wallow}
-                resizeMode="contain"
-                style={styles.offWallowImg}
-              />
-            )}
-          </View>
+          <CircularProgressBase
+            value={40}
+            radius={87}
+            activeStrokeColor={'#fff'}
+            inActiveStrokeColor={'#fff'}
+            duration={2000}
+            maxValue={100}>
+            <View style={styles.bigCircle}>
+              {pulse.map((item, index) =>
+                play ? <Pulse repeat={index === 0} /> : <View />,
+              )}
+              {play ? (
+                <AnimatedPulseImg />
+              ) : (
+                <Image
+                  source={Off_Wallow}
+                  resizeMode="contain"
+                  style={styles.walowImg}
+                />
+              )}
+            </View>
+          </CircularProgressBase>
         </View>
         <View style={styles.bottomContainer}>
+          <View style={styles.counter}>
+            {play ? (
+              <Timer expirationDate={selected} focus={true} loading={false} />
+            ) : (
+              <View />
+            )}
+          </View>
           <View style={styles.playBtnContainer}>
             <TouchableOpacity
-              onPress={() => setPlay(!play)}
+              onPress={() => {
+                setPlay(!play);
+              }}
               style={styles.circlePlayBtn}>
               <Icon
                 name={play ? 'pause' : 'play'}
@@ -113,7 +151,10 @@ const App = () => {
                   bgColor={selected ? '#fff' : '#999'}
                   title={title}
                   key={id}
-                  onPress={() => handleButtonClick(index)}
+                  onPress={() => {
+                    // setSelectedTime(button[index].timer);
+                    handleTimeBtnClick(index);
+                  }}
                 />
               );
             })}
@@ -142,6 +183,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  inExhaleContainer: {
+    alignItems: 'center',
+  },
+  inExhale: {
+    color: '#ffffff',
+    fontWeight: '500',
+    fontSize: 15,
+  },
   bigCircle: {
     width: 150,
     height: 150,
@@ -149,9 +198,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#7B66FF',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 9999,
   },
-  offWallowImg: {
+  walowImg: {
     width: 45,
     height: 45,
   },
@@ -159,10 +207,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  bottomContainer: {},
+  bottomContainer: {
+    height: Dimensions.get('screen').height * 0.25,
+    justifyContent: 'space-evenly',
+    width: '100%',
+  },
   playBtnContainer: {
     alignSelf: 'center',
     marginBottom: 25,
+  },
+  counter: {
+    alignItems: 'center',
+    height: 25,
   },
   circlePlayBtn: {
     width: 45,

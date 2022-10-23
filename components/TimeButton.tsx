@@ -12,7 +12,7 @@ interface Props {
 const TimeButton = ({title, bgColor, textStyle, textColor, onPress}: Props) => {
   return (
     <TouchableOpacity
-      onPress={() => onPress()}
+      onPress={onPress}
       style={[styles.container, {backgroundColor: bgColor}]}>
       <Icon name="clock" color="#000" size={20} />
       <Text style={[styles.text, textStyle, {color: '#000'}]}>{title}</Text>

@@ -10,8 +10,10 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "moment": "^2.29.4",
     "react": "18.1.0",
     "react-native": "0.70.3",
+    "react-native-animatable": "^1.3.3",
     "react-native-animated-pulse": "^1.0.1",
     "react-native-circular-progress-indicator": "^4.4.0",
     "react-native-linear-gradient": "^2.6.2",
