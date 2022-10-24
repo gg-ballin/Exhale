@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Animated,
   Dimensions,
@@ -16,7 +16,10 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Icon from 'react-native-vector-icons/Feather';
 import TimeButton from './components/TimeButton';
 import Pulse from './components/Pulse';
-import {CircularProgressBase} from 'react-native-circular-progress-indicator';
+import {
+  CircularProgressBase,
+  ProgressRef,
+} from 'react-native-circular-progress-indicator';
 import Timer from './components/Timer';
 import AnimatedPulseImg from './components/AnimatedPulseImg';
 import On_Wallow from './assets/On_Walow.png';
@@ -46,34 +49,46 @@ const data = [
 const App = () => {
   const [button, setButton] = useState(data);
   const isDarkMode = useColorScheme() === 'dark';
-  const [play, setPlay] = useState(false);
   const [pulse, setPulse] = useState([1]);
-  const [selectedTime, setSelectedTime] = useState(60);
+  const [play, setPlay] = useState(false);
+  const [text, setText] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [selected, setSelected] = useState();
+  const progressRef = useRef<ProgressRef>(null);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
     }).start();
-    setSelected(60)
+    setSelected(60);
   }, []);
 
   const handleTimeBtnClick = (index: number) => {
-    
     const newData = [...button];
     newData[0].selected = false;
     newData[1].selected = false;
     newData[2].selected = false;
     newData[index].selected = !newData[index].selected;
     setButton(newData);
-    setSelected(newData[index].timer)
-    console.log('selected: ', selected)
+    setSelected(newData[index].timer);
   };
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+  const props = {
+    activeStrokeWidth: 25,
+    inActiveStrokeWidth: 25,
+    inActiveStrokeOpacity: 0.2,
+  };
+  const playPressed = () => {
+    setPlay(!play);
+  };
+  if (play) {
+    setTimeout(() => {
+      setText(!text);
+    }, 5000);
+  }
   return (
     <LinearGradient
       style={styles.linearGradient}
@@ -87,25 +102,33 @@ const App = () => {
         <Icon name="chevron-left" color={'#ffffff'} size={25} />
         <View style={styles.containerTitle}>
           <Text style={styles.title}>Breathe & relax</Text>
+          {play ? (
+            <Animated.View
+              style={[
+                styles.inExhaleContainer,
+                {
+                  opacity: fadeAnim,
+                },
+              ]}>
+              <Text style={styles.inExhale}>{text ? 'Exhale' : 'Inhale'}</Text>
+            </Animated.View>
+          ) : (
+            <View style={styles.inExhaleContainer} />
+          )}
         </View>
-
-        <Animated.View
-          style={[
-            styles.inExhaleContainer,
-            {
-              opacity: fadeAnim,
-            },
-          ]}>
-          <Text style={styles.inExhale}>{play ? 'Inhale' : 'Exhale'}</Text>
-        </Animated.View>
 
         <View style={styles.topContainer}>
           <CircularProgressBase
-            value={40}
-            radius={87}
+            {...props}
+            value={play ? 100 : 0}
+            radius={80}
+            ref={progressRef}
+            onAnimationComplete={() => {
+              play && progressRef.current?.reAnimate() && setText(!text);
+            }}
             activeStrokeColor={'#fff'}
             inActiveStrokeColor={'#fff'}
-            duration={2000}
+            duration={play ? 5000 : 0}
             maxValue={100}>
             <View style={styles.bigCircle}>
               {pulse.map((item, index) =>
@@ -126,16 +149,20 @@ const App = () => {
         <View style={styles.bottomContainer}>
           <View style={styles.counter}>
             {play ? (
-              <Timer expirationDate={selected} focus={true} loading={false} />
+              <Timer
+                expirationDate={selected}
+                onTimerFinish={() => setPlay(false)}
+                isPlaying={play}
+                focus={true}
+                loading={false}
+              />
             ) : (
               <View />
             )}
           </View>
           <View style={styles.playBtnContainer}>
             <TouchableOpacity
-              onPress={() => {
-                setPlay(!play);
-              }}
+              onPress={() => playPressed()}
               style={styles.circlePlayBtn}>
               <Icon
                 name={play ? 'pause' : 'play'}
@@ -150,9 +177,10 @@ const App = () => {
                 <TimeButton
                   bgColor={selected ? '#fff' : '#999'}
                   title={title}
+                  disabled={play}
                   key={id}
                   onPress={() => {
-                    // setSelectedTime(button[index].timer);
+                    // setEndTime();
                     handleTimeBtnClick(index);
                   }}
                 />
@@ -185,6 +213,8 @@ const styles = StyleSheet.create({
   },
   inExhaleContainer: {
     alignItems: 'center',
+    height: 25,
+    marginTop: 20,
   },
   inExhale: {
     color: '#ffffff',

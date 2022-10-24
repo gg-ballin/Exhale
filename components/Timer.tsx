@@ -6,9 +6,12 @@ const Timer: React.FC<{
   expirationDate: number;
   focus: boolean;
   loading: boolean;
-}> = ({expirationDate, focus, loading}) => {
+  onTimerFinish: any;
+  isPlaying: any;
+}> = ({expirationDate, focus, loading, onTimerFinish, isPlaying}) => {
   const [inactive, setIncative] = useState(false);
-  const [timerCount, setTimer] = useState<number>(0);
+  const [timerCount, setTimer] = useState<number>(1);
+
   useEffect(() => {
     setTimer((prev: number) => expirationDate);
     let interval = setInterval(() => {
@@ -17,8 +20,16 @@ const Timer: React.FC<{
         return lastTimerCount - 1;
       });
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [loading]);
+  if (timerCount === 0 && isPlaying) {
+    setTimeout(() => {
+      onTimerFinish();
+    }, 1000);
+  }
+  console.log('timer: ', timerCount)
   return (
     <View style={[styles.container]}>
       <Text style={styles.text}>
